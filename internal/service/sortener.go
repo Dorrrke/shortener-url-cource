@@ -1,9 +1,10 @@
 package service
 
 import (
+	"errors"
 	"math/rand"
 	"strings"
-	"url-shortener/internal/domain/errors"
+	domainErrors "url-shortener/internal/domain/errors"
 	"url-shortener/internal/domain/models"
 
 	"go.uber.org/zap"
@@ -30,7 +31,7 @@ func New(stor Storage, log *zap.Logger) *Shortener {
 
 func (s *Shortener) SaveURL(url string, uid string) (string, error) {
 	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
-		return "", errors.ErrInvalidLink
+		return "", domainErrors.ErrInvalidLink
 	}
 
 	lID := generateCode()
@@ -42,11 +43,20 @@ func (s *Shortener) SaveURL(url string, uid string) (string, error) {
 	}
 
 	err := s.storage.Save(link)
-	if err != nil {
-		return "", err
+	if err == nil {
+		return lID, nil
 	}
 
-	return lID, nil
+	if errors.Is(err, domainErrors.ErrCodeAlreadyExists) {
+		lID = generateCode()
+		link.Short = lID
+		err := s.storage.Save(link)
+		if err == nil {
+			return lID, nil
+		}
+	}
+
+	return "", err
 }
 
 func (s *Shortener) Get(code string) (models.Link, error) {

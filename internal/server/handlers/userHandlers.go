@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 	"time"
+	domainErrors "url-shortener/internal/domain/errors"
 	"url-shortener/internal/domain/models"
 	"url-shortener/internal/service/auth"
 
@@ -30,7 +32,10 @@ func (uh *UserHandler) Register(ctx *gin.Context) {
 
 	userID, err := uh.service.SaveUser(regReq)
 	if err != nil {
-		//TODO: добавить валидацию ошибки
+		if errors.Is(err, domainErrors.ErrUserAlreadyExists) {
+			ctx.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -48,7 +53,14 @@ func (uh *UserHandler) Login(ctx *gin.Context) {
 
 	userID, err := uh.service.ValidationUser(loginReq)
 	if err != nil {
-		//TODO: добавить валидацию ошибки
+		if errors.Is(err, domainErrors.ErrInvalidCredentials) {
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			return
+		}
+		if errors.Is(err, domainErrors.ErrUserNotFound) {
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

@@ -1,7 +1,8 @@
 package user
 
 import (
-	"url-shortener/internal/domain/errors"
+	"errors"
+	domainErrors "url-shortener/internal/domain/errors"
 	"url-shortener/internal/domain/models"
 
 	"github.com/google/uuid"
@@ -45,10 +46,20 @@ func (u *UserService) SaveUser(regReq models.RegisterRequest) (string, error) {
 	}
 
 	err = u.UserRepository.SaveUser(user)
-	if err != nil {
-		return "", err
+	if err == nil {
+		return userID, nil
 	}
-	return userID, nil
+
+	if errors.Is(err, domainErrors.ErrUserIDAlreadyExists) {
+		userID = uuid.New().String()
+		user.ID = userID
+		err = u.UserRepository.SaveUser(user)
+		if err == nil {
+			return userID, err
+		}
+	}
+
+	return "", err
 }
 
 func (u *UserService) ValidationUser(loginReq models.LoginRequest) (string, error) {
@@ -62,7 +73,7 @@ func (u *UserService) ValidationUser(loginReq models.LoginRequest) (string, erro
 		[]byte(loginReq.Password),
 	)
 	if err != nil {
-		return "", errors.ErrInvalidCredentials
+		return "", domainErrors.ErrInvalidCredentials
 	}
 
 	return user.ID, nil
