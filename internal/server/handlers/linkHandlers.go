@@ -45,7 +45,7 @@ func (uh *LinkHandler) SaveURL(ctx *gin.Context) {
 			return
 		}
 		if errors.Is(err, domainErrors.ErrLinkAlreadyExists) {
-			ctx.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+			ctx.JSON(http.StatusConflict, gin.H{"error": "Вы уже сокращали эту ссылку"})
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
