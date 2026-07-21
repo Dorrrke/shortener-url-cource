@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
+	domainErrors "url-shortener/internal/domain/errors"
 	"url-shortener/internal/domain/models"
 
 	"github.com/gin-gonic/gin"
@@ -38,7 +40,14 @@ func (uh *LinkHandler) SaveURL(ctx *gin.Context) {
 
 	lID, err := uh.service.SaveURL(req.URL, uid)
 	if err != nil {
-		//TODO: добавить валидацию ошибки
+		if errors.Is(err, domainErrors.ErrInvalidLink) {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		if errors.Is(err, domainErrors.ErrLinkAlreadyExists) {
+			ctx.JSON(http.StatusConflict, gin.H{"error": "Вы уже сокращали эту ссылку"})
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -53,7 +62,10 @@ func (uh *LinkHandler) Get(ctx *gin.Context) {
 
 	link, err := uh.service.Get(lId)
 	if err != nil {
-		//TODO: добавить валидацию ошибки
+		if errors.Is(err, domainErrors.ErrLinkNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -66,7 +78,11 @@ func (uh *LinkHandler) GetAll(ctx *gin.Context) {
 
 	urls, err := uh.service.GetAll(uid)
 	if err != nil {
-		//TODO: добавить валидацию ошибки
+		if errors.Is(err, domainErrors.ErrLinkNotFound) ||
+			errors.Is(err, domainErrors.ErrStorageIsEmpty) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
