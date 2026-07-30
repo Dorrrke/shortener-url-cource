@@ -26,7 +26,7 @@ func New(port int, s handlers.LinkService, us handlers.UserService, log *zap.Log
 
 	srv := &http.Server{
 		Handler: router,
-		Addr:    "localhost:8080",
+		Addr:    "0.0.0.0:8080",
 	}
 
 	return &Server{
