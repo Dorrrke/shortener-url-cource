@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 )
 
-type Storage interface {
+type LinkRepository interface {
 	Save(models.Link) error
 	Get(string) (models.Link, error)
 	Delete(string) error
@@ -18,11 +18,11 @@ type Storage interface {
 }
 
 type Shortener struct {
-	storage Storage
+	storage LinkRepository
 	log     *zap.Logger
 }
 
-func New(stor Storage, log *zap.Logger) *Shortener {
+func New(stor LinkRepository, log *zap.Logger) *Shortener {
 	return &Shortener{
 		storage: stor,
 		log:     log,

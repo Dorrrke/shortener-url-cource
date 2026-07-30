@@ -9,6 +9,7 @@ import (
 
 type Config struct {
 	Port  int
+	DBDSN string
 	Debug bool
 }
 
@@ -22,6 +23,10 @@ func ReadConfig() (Config, error) {
 	port := cmp.Or(
 		os.Getenv("SHORTENER_PORT"),
 		"8080",
+	)
+	cfg.DBDSN = cmp.Or(
+		os.Getenv("DB_DSN"),
+		"postgres://pguser:pgpass@localhost:5432/shortener_db?sslmode=disable",
 	)
 	if port != "8080" && cfg.Port == 8080 {
 		cfg.Port, err = strconv.Atoi(port)
