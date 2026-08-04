@@ -51,6 +51,7 @@ func configureRoutes(lh *handlers.LinkHandler, uh *handlers.UserHandler) *gin.En
 	{
 		users.POST("/register", uh.Register)
 		users.POST("/login", uh.Login)
+		users.GET("/info", auth.AuthMiddleware, uh.GetInfo)
 	}
 
 	link := router.Group("/link")

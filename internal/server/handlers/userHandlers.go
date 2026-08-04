@@ -14,6 +14,7 @@ import (
 type UserService interface {
 	SaveUser(models.RegisterRequest) (string, error)
 	ValidationUser(models.LoginRequest) (string, error)
+	GetUserInfo(string) (models.UserInfo, error)
 }
 
 type UserHandler struct {
@@ -73,4 +74,20 @@ func (uh *UserHandler) Login(ctx *gin.Context) {
 
 	ctx.Header("Authorization", "Bearer "+token)
 	ctx.JSON(http.StatusOK, gin.H{"user_id": userID})
+}
+
+func (uh *UserHandler) GetInfo(ctx *gin.Context) {
+	userID := ctx.MustGet("userID").(string)
+
+	userInfo, err := uh.service.GetUserInfo(userID)
+	if err != nil {
+		if errors.Is(err, domainErrors.ErrUserNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, userInfo)
 }

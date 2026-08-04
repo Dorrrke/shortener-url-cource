@@ -39,3 +39,52 @@ func (s *Storage) GetUser(email string) (models.User, error) {
 
 	return user, nil
 }
+
+func (s *Storage) GetUserInfo(userID string) (models.User, []models.Link, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
+	defer cancel()
+
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return models.User{}, nil, err
+	}
+	defer tx.Rollback(ctx)
+
+	var user models.User
+	err = tx.QueryRow(
+		ctx,
+		"SELECT id, name, email, created_at FROM users WHERE id = $1",
+		userID,
+	).Scan(
+		&user.ID,
+		&user.Name,
+		&user.Email,
+		&user.CreatedAt,
+	)
+	if err != nil {
+		return models.User{}, nil, err
+	}
+
+	var links []models.Link
+	rows, err := tx.Query(ctx, "SELECT short, original, clicks, updated_at, created_at FROM links WHERE user_id = $1", userID)
+	if err != nil {
+		return models.User{}, nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var link models.Link
+		if err := rows.Scan(&link.Short, &link.Original, &link.Clicks, &link.UpdatedAt, &link.CratedAt); err != nil {
+			return models.User{}, nil, err
+		}
+		link.UserID = userID
+		links = append(links, link)
+	}
+
+	if err = tx.Commit(ctx); err != nil {
+		return models.User{}, nil, err
+	}
+
+	return user, links, nil
+}

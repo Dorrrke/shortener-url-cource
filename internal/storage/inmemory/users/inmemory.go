@@ -42,3 +42,7 @@ func (ims *InMemoryUserStorage) GetUser(email string) (models.User, error) {
 
 	return models.User{}, errors.ErrUserNotFound
 }
+
+func (ims *InMemoryUserStorage) GetUserInfo(userID string) (models.User, []models.Link, error) {
+	panic("not implemented")
+}

@@ -18,23 +18,37 @@ func (s *Storage) Save(link models.Link) error {
 	return err
 }
 
-func (s *Storage) Get(short string) (models.Link, error) {
+func (s *Storage) Get(short string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
 	defer cancel()
 
-	var link models.Link
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return "", err
+	}
+	defer tx.Rollback(ctx)
 
-	err := s.pool.QueryRow(
+	var link string
+
+	err = tx.QueryRow(
 		ctx,
-		"SELECT short, original, user_id FROM links WHERE short = $1",
+		"SELECT original FROM links WHERE short = $1",
 		short,
-	).Scan(
-		&link.Short,
-		&link.Original,
-		&link.UserID,
+	).Scan(&link)
+	if err != nil {
+		return "", err
+	}
+
+	_, err = tx.Exec(ctx,
+		"UPDATE links SET clicks = clicks + 1, updated_at = NOW() WHERE short = $1",
+		short,
 	)
 	if err != nil {
-		return models.Link{}, err
+		return "", err
+	}
+
+	if err = tx.Commit(ctx); err != nil {
+		return "", err
 	}
 
 	return link, nil

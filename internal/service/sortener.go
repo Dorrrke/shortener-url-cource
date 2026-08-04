@@ -12,7 +12,7 @@ import (
 
 type LinkRepository interface {
 	Save(models.Link) error
-	Get(string) (models.Link, error)
+	Get(string) (string, error)
 	Delete(string) error
 	GetAll(string) (map[string]models.Link, error)
 }
@@ -59,13 +59,13 @@ func (s *Shortener) SaveURL(url string, uid string) (string, error) {
 	return "", err
 }
 
-func (s *Shortener) Get(code string) (models.Link, error) {
-	url, err := s.storage.Get(code)
+func (s *Shortener) Get(code string) (string, error) {
+	link, err := s.storage.Get(code)
 	if err != nil {
-		return models.Link{}, err
+		return "", err
 	}
 
-	return url, nil
+	return link, nil
 }
 
 func (s *Shortener) Delete(code string) error {

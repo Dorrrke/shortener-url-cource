@@ -12,7 +12,7 @@ import (
 
 type LinkService interface {
 	SaveURL(string, string) (string, error)
-	Get(string) (models.Link, error)
+	Get(string) (string, error)
 	Delete(string) error
 	GetAll(string) (map[string]models.Link, error)
 }
@@ -58,9 +58,9 @@ func (uh *LinkHandler) SaveURL(ctx *gin.Context) {
 }
 
 func (uh *LinkHandler) Get(ctx *gin.Context) {
-	lId := ctx.Param("id")
+	lID := ctx.Param("id")
 
-	link, err := uh.service.Get(lId)
+	link, err := uh.service.Get(lID)
 	if err != nil {
 		if errors.Is(err, domainErrors.ErrLinkNotFound) {
 			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
@@ -70,7 +70,7 @@ func (uh *LinkHandler) Get(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Redirect(http.StatusFound, link.Original)
+	ctx.Redirect(http.StatusFound, link)
 }
 
 func (uh *LinkHandler) GetAll(ctx *gin.Context) {
