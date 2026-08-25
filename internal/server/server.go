@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"url-shortener/internal/server/handlers"
-	"url-shortener/internal/service/auth"
+
+	"github.com/Dorrrke/shortener-url-cource/internal/server/handlers"
+	"github.com/Dorrrke/shortener-url-cource/internal/service/auth"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"

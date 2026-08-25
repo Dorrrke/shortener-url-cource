@@ -1,8 +1,8 @@
 package inmemory
 
 import (
-	"url-shortener/internal/domain/errors"
-	"url-shortener/internal/domain/models"
+	"github.com/Dorrrke/shortener-url-cource/internal/domain/errors"
+	"github.com/Dorrrke/shortener-url-cource/internal/domain/models"
 
 	"go.uber.org/zap"
 )

@@ -4,8 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	domainErrors "url-shortener/internal/domain/errors"
-	"url-shortener/internal/domain/models"
+
+	domainErrors "github.com/Dorrrke/shortener-url-cource/internal/domain/errors"
+	"github.com/Dorrrke/shortener-url-cource/internal/domain/models"
 
 	"github.com/gin-gonic/gin"
 )
@@ -40,10 +41,6 @@ func (uh *LinkHandler) SaveURL(ctx *gin.Context) {
 
 	lID, err := uh.service.SaveURL(req.URL, uid)
 	if err != nil {
-		if errors.Is(err, domainErrors.ErrInvalidLink) {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
 		if errors.Is(err, domainErrors.ErrLinkAlreadyExists) {
 			ctx.JSON(http.StatusConflict, gin.H{"error": "Вы уже сокращали эту ссылку"})
 			return

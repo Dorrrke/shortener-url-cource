@@ -4,9 +4,10 @@ import (
 	"errors"
 	"net/http"
 	"time"
-	domainErrors "url-shortener/internal/domain/errors"
-	"url-shortener/internal/domain/models"
-	"url-shortener/internal/service/auth"
+
+	domainErrors "github.com/Dorrrke/shortener-url-cource/internal/domain/errors"
+	"github.com/Dorrrke/shortener-url-cource/internal/domain/models"
+	"github.com/Dorrrke/shortener-url-cource/internal/service/auth"
 
 	"github.com/gin-gonic/gin"
 )

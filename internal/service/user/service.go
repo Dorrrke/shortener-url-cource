@@ -2,8 +2,9 @@ package user
 
 import (
 	"errors"
-	domainErrors "url-shortener/internal/domain/errors"
-	"url-shortener/internal/domain/models"
+
+	domainErrors "github.com/Dorrrke/shortener-url-cource/internal/domain/errors"
+	"github.com/Dorrrke/shortener-url-cource/internal/domain/models"
 
 	"github.com/google/uuid"
 	"go.uber.org/zap"

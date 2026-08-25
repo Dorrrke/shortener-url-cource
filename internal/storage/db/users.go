@@ -2,7 +2,8 @@ package db
 
 import (
 	"context"
-	"url-shortener/internal/domain/models"
+
+	"github.com/Dorrrke/shortener-url-cource/internal/domain/models"
 )
 
 func (s *Storage) SaveUser(user models.User) error {

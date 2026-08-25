@@ -4,8 +4,9 @@ import (
 	"errors"
 	"math/rand"
 	"strings"
-	domainErrors "url-shortener/internal/domain/errors"
-	"url-shortener/internal/domain/models"
+
+	domainErrors "github.com/Dorrrke/shortener-url-cource/internal/domain/errors"
+	"github.com/Dorrrke/shortener-url-cource/internal/domain/models"
 
 	"go.uber.org/zap"
 )
@@ -30,10 +31,6 @@ func New(stor LinkRepository, log *zap.Logger) *Shortener {
 }
 
 func (s *Shortener) SaveURL(url string, uid string) (string, error) {
-	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
-		return "", domainErrors.ErrInvalidLink
-	}
-
 	lID := generateCode()
 
 	link := models.Link{

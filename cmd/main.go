@@ -2,14 +2,15 @@ package main
 
 import (
 	"context"
-	"url-shortener/internal"
-	"url-shortener/internal/server"
-	"url-shortener/internal/service"
-	"url-shortener/internal/service/user"
-	"url-shortener/internal/storage/db"
-	inmemory "url-shortener/internal/storage/inmemory/links"
-	"url-shortener/internal/storage/inmemory/users"
-	"url-shortener/pkg/logger"
+
+	"github.com/Dorrrke/shortener-url-cource/internal"
+	"github.com/Dorrrke/shortener-url-cource/internal/server"
+	"github.com/Dorrrke/shortener-url-cource/internal/service"
+	"github.com/Dorrrke/shortener-url-cource/internal/service/user"
+	"github.com/Dorrrke/shortener-url-cource/internal/storage/db"
+	inmemory "github.com/Dorrrke/shortener-url-cource/internal/storage/inmemory/links"
+	"github.com/Dorrrke/shortener-url-cource/internal/storage/inmemory/users"
+	"github.com/Dorrrke/shortener-url-cource/pkg/logger"
 
 	"go.uber.org/zap"
 )
