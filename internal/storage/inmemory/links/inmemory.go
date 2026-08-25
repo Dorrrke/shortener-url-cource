@@ -33,13 +33,13 @@ func (ims *InMemoryLinkStorage) Save(link models.Link) error {
 	return nil
 }
 
-func (ims *InMemoryLinkStorage) Get(code string) (models.Link, error) {
+func (ims *InMemoryLinkStorage) Get(code string) (string, error) {
 	link, ok := ims.storage[code]
 	if !ok {
-		return models.Link{}, errors.ErrLinkNotFound
+		return "", errors.ErrLinkNotFound
 	}
 
-	return link, nil
+	return link.Original, nil
 }
 
 func (ims *InMemoryLinkStorage) Delete(code string) error {

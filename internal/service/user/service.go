@@ -13,6 +13,7 @@ import (
 type UserRepository interface {
 	SaveUser(models.User) error
 	GetUser(string) (models.User, error)
+	GetUserInfo(string) (models.User, []models.Link, error)
 }
 
 type UserService struct {
@@ -77,4 +78,22 @@ func (u *UserService) ValidationUser(loginReq models.LoginRequest) (string, erro
 	}
 
 	return user.ID, nil
+}
+
+func (u *UserService) GetUserInfo(userID string) (models.UserInfo, error) {
+	user, links, err := u.UserRepository.GetUserInfo(userID)
+	if err != nil {
+		return models.UserInfo{}, err
+	}
+
+	u.log.Debug("User info retrieved", zap.String("userID", userID), zap.Int("linksCount", len(links)))
+	u.log.Debug("Links:", zap.Any("links", links))
+
+	return models.UserInfo{
+		ID:        user.ID,
+		Name:      user.Name,
+		Email:     user.Email,
+		CreatedAt: user.CreatedAt,
+		Links:     links,
+	}, nil
 }
