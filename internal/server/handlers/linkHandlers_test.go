@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"errors"
-	"log"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	domainErrors "github.com/Dorrrke/shortener-url-cource/internal/domain/errors"
@@ -114,11 +114,6 @@ func TestSaveURL(t *testing.T) {
 
 func TestGet(t *testing.T) {
 	linksHandler := LinkHandler{domain: "test.org"}
-	r := gin.New()
-	r.GET("/link/:id", linksHandler.Get)
-	httpSrv := httptest.NewServer(r)
-	defer httpSrv.Close()
-
 	type want struct {
 		statusCode int
 		link       string
@@ -141,28 +136,45 @@ func TestGet(t *testing.T) {
 				link:       "http://vk.com/test",
 			},
 		},
+		{
+			name:    "Case 2: Link not found",
+			method:  http.MethodGet,
+			request: "/link/new-link",
+			want: want{
+				statusCode: http.StatusNotFound,
+				err:        domainErrors.ErrLinkNotFound,
+			},
+		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			mockService := NewMockLinkService(t)
 			mockService.
-				On("Get", "short-link").
+				On("Get", strings.TrimPrefix(tc.request, "/link/")).
 				Return(tc.want.link, tc.want.err).Maybe()
 
 			linksHandler.service = mockService
 
-			req := resty.New().R()
+			router := gin.New()
+			router.GET("/link/:id", linksHandler.Get)
 
-			req.Method = tc.method
-			req.URL = httpSrv.URL + tc.request
+			req := httptest.NewRequest(
+				tc.method,
+				tc.request,
+				nil,
+			)
 
-			response, err := req.Send()
-			assert.NoError(t, err)
+			rec := httptest.NewRecorder()
 
-			log.Println(response.Header())
-			assert.Equal(t, tc.want.statusCode, response.StatusCode())
-			assert.Equal(t, tc.want.link, response.Header().Get("Location"))
+			router.ServeHTTP(rec, req)
+
+			assert.Equal(t, tc.want.statusCode, rec.Code)
+			if tc.want.err != nil {
+				assert.Contains(t, rec.Body.String(), tc.want.err.Error())
+			} else {
+				assert.Equal(t, tc.want.link, rec.Header().Get("Location"))
+			}
 		})
 	}
 
